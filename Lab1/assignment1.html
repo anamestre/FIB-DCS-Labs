@@ -17,7 +17,26 @@
 <canvas id="canvas2" height="600" width="800" class="bezier"  style="border:1px solid #d3d3d3;"></canvas>
 <br>
 <button type="button" onclick="doReset()">Reset</button>
-<button type="button" onclick="doScaling()">(Example) Scale by 0.5</button>
+
+<input type="text" id="lambda1">Lambda 1</input>
+<input type="text" id="lambda2">Lambda 2</input>
+<button type="button" onclick="doScaling()">Scale</button>
+
+
+<!-- New stuff :) -->
+<input type="text" id="addX">X</input>
+<input type="text" id="addY">Y</input>
+<button type="button" onclick="doTranslation()">Translate</button>
+
+<input type="text" id="angle">Angle</input>
+<button type="button" onclick="doRotation()">Rotate</button>
+
+<button type="button" onclick="doReflection()">Reflection x-axis</button>
+<button type="button" onclick="doTandR()">Translation and Rotation</button>
+<button type="button" onclick="doRandT()">Rotation and Translation</button>
+
+<input type="text" id="id_xy">X or Y</input>
+<input type="text" id="xy_value">Value</input>
 
 
 <script type="text/javascript">
@@ -223,23 +242,132 @@
      * Auxiliary functions
      */
 
+
+
+    function doReset () {
+        myTransformation = function(p){return p}; //Identity transform
+        drawCanvas();
+    }
+    
+    // **************************************************************
+    // ************************ PROBLEM 1 ***************************
+    // **************************************************************
+    
     var scalingFunction = function (point) {
-        var matrix = math.matrix([[0.5, 0], [0, 0.5]]); //2x2 scaling matrix (for 0.5)
+        var lambda1 = document.getElementById("lambda1").value;
+        var lambda2 = document.getElementById("lambda2").value;
+        var matrix = math.matrix([[lambda1, 0], [0, lambda2]]); //2x2 scaling matrix (for 0.5)
         var pointAsArray = [point.x, point.y];
         var result = math.multiply(matrix,pointAsArray); // result is a matrix!
         var transformedPoint = {x: result.get([0]),y: result.get([1])};
         return transformedPoint;
     }
 
-    function doReset () {
-        myTransformation = function(p){return p}; //Identity transform
-        drawCanvas();
-    }
-
     // This is just an example
     function doScaling() {
         myTransformation = scalingFunction;
         drawCanvas();
+    }
+    
+
+    var translationFunction = function(point){
+        var addX = document.getElementById("addX").value;
+        var addY = document.getElementById("addY").value;
+        var pointAsArray = [point.x, point.y, 1];
+        var matrix = math.matrix([[1, 0, addX], [0, 1, addY]]);
+        var result = math.multiply(matrix,pointAsArray); // result is a matrix!
+        var transformedPoint = {x: result.get([0]),y: result.get([1])};
+        return transformedPoint;        
+    }
+    
+    function doTranslation(){
+        myTransformation = translationFunction;
+        drawCanvas();
+    }
+    
+    var rotationFunction = function(point){
+        var angle = document.getElementById("angle").value;
+        var matrix = math.matrix([[math.cos(angle), -math.sin(angle)],
+                                  [math.sin(angle), math.cos(angle)]]);
+        var pointAsArray = [point.x, point.y];
+        var result = math.multiply(matrix,pointAsArray); // result is a matrix!
+        var transformedPoint = {x: result.get([0]),y: result.get([1])};
+        return transformedPoint;
+    }
+    
+    function doRotation(){
+        myTransformation = rotationFunction;
+        drawCanvas();
+    }
+    
+    var reflectionFunction = function(point){
+        return {x: point.x, y: -point.y};
+    }
+    
+    function doReflection(){
+        myTransformation = reflectionFunction;
+        drawCanvas();
+    }
+    
+    
+    // **************************************************************
+    // ************************ PROBLEM 2 ***************************
+    // **************************************************************
+    
+    var TandRFunction = function(point){
+    
+        var addX = document.getElementById("addX").value;
+        var addY = document.getElementById("addY").value;
+        var pointAsArray = [point.x, point.y, 1];
+        var matrix = math.matrix([[1, 0, addX], [0, 1, addY]]);
+        var result = math.multiply(matrix,pointAsArray); // result is a matrix!
+        var transformedPoint = {x: result.get([0]),y: result.get([1])};
+        
+        
+        var angle = document.getElementById("angle").value;
+        var matrix = math.matrix([[math.cos(angle), -math.sin(angle)],
+                                  [math.sin(angle), math.cos(angle)]]);
+        var pointAsArray = [transformedPoint.x, transformedPoint.y];
+        var result = math.multiply(matrix, pointAsArray); // result is a matrix!
+        var newTransformedPoint = {x: result.get([0]),y: result.get([1])};
+        return newTransformedPoint;
+        
+        
+    }
+    
+    function doTandR(){
+        myTransformation = TandRFunction;
+        drawCanvas();
+    }
+
+    
+    var RandTFunction = function(point){
+        var angle = document.getElementById("angle").value;
+        var matrix = math.matrix([[math.cos(angle), -math.sin(angle)],
+                                  [math.sin(angle), math.cos(angle)]]);
+        var pointAsArray = [point.x, point.y];
+        var result = math.multiply(matrix,pointAsArray); // result is a matrix!
+        var transformedPoint = {x: result.get([0]),y: result.get([1])};
+        
+        var addX = document.getElementById("addX").value;
+        var addY = document.getElementById("addY").value;
+        var pointAsArray = [transformedPoint.x, transformedPoint.y, 1];
+        var matrix = math.matrix([[1, 0, addX], [0, 1, addY]]);
+        var result = math.multiply(matrix, pointAsArray); // result is a matrix!
+        var newTransformedPoint = {x: result.get([0]),y: result.get([1])};
+        return newTransformedPoint;     
+
+    }
+    
+    function doRandT(){
+        myTransformation = RandTFunction;
+        drawCanvas();
+    }
+    
+    var reflectionFunction = function(point){
+        var x_or_y = document.getElementById("id_xy").value;
+        var value = document.getElementById("xy_value").value;
+
     }
 
 
