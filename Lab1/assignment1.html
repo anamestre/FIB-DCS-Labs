@@ -18,25 +18,52 @@
 <br>
 <button type="button" onclick="doReset()">Reset</button>
 
-<input type="text" id="lambda1">Lambda 1</input>
-<input type="text" id="lambda2">Lambda 2</input>
-<button type="button" onclick="doScaling()">Scale</button>
+<div>
+    <p> Scale </p>
+    <input type="text" id="lambda1">Lambda 1</input>
+    <input type="text" id="lambda2">Lambda 2</input>
+    <button type="button" onclick="doScaling()">Go!</button>
+</div>
+<br></br>
 
 
 <!-- New stuff :) -->
-<input type="text" id="addX">X</input>
-<input type="text" id="addY">Y</input>
-<button type="button" onclick="doTranslation()">Translate</button>
+<div>
+    <p> Translate </p>
+    <input type="text" id="addX">X</input>
+    <input type="text" id="addY">Y</input>
+    <button type="button" onclick="doTranslation()">Go!</button>
+</div>
+<br></br>
 
-<input type="text" id="angle">Angle</input>
-<button type="button" onclick="doRotation()">Rotate</button>
+<div>
+    <p> Rotate </p>
+    <input type="text" id="angle">Angle</input>
+    <button type="button" onclick="doRotation()">Go!</button>
+</div>
+<br></br>
 
-<button type="button" onclick="doReflection()">Reflection x-axis</button>
-<button type="button" onclick="doTandR()">Translation and Rotation</button>
-<button type="button" onclick="doRandT()">Rotation and Translation</button>
+<div>
+    <p> Reflection x-axis </p>
+    <button type="button" onclick="doReflection()">Go!</button>
+</div>
+<br></br>
 
-<input type="text" id="id_xy">X or Y</input>
-<input type="text" id="xy_value">Value</input>
+<div>
+    <p> Let's play with rotations and translations </p>
+    <button type="button" onclick="doTandR()">Translation and Rotation</button>
+    <button type="button" onclick="doRandT()">Rotation and Translation</button>
+</div>
+<br></br>
+
+<div>
+    <p> Reflection with respect to a given line </p>
+    <input type="text" id="id_B">X</input>
+    <input type="text" id="id_A">Y</input>
+    <input type="text" id="id_C">...</input>
+    <button type="button" onclick="doReflection()"> Go! </button>
+</div>
+<br></br>
 
 
 <script type="text/javascript">
@@ -365,9 +392,35 @@
     }
     
     var reflectionFunction = function(point){
-        var x_or_y = document.getElementById("id_xy").value;
-        var value = document.getElementById("xy_value").value;
-
+        var a = document.getElementById("id_A").value;
+        var b = document.getElementById("id_B").value;
+        var c = document.getElementById("id_C").value;
+        var x = getReflectedX(point.x, point.y, a, b, c);
+        var y = getReflectedY(point.x, point.y, a, b, c);
+        var transformedPoint = {x: x, y: y};
+        return transformedPoint;
+    }
+    
+    function getReflectedX(firstX, firstY, a, b, c){
+        var a2 = a*a;
+        var b2 = b*b;
+        var firstPart = firstX*(a2 - b2);
+        var secondPart =  2*b*(a*firstY + c);
+        return (firstPart - secondPart)/(a2 + b2);
+    }
+    
+    
+    function getReflectedY(firstX, firstY, a, b, c){
+        var a2 = a*a;
+        var b2 = b*b;
+        var firstPart = firstY*(b2 - a2);
+        var secondPart = 2*a*(b*firstX + c);
+        return (firstPart - secondPart)/(a2 + b2);
+    }
+    
+    function doReflection(){
+        myTransformation = reflectionFunction;
+        drawCanvas();
     }
 
 
