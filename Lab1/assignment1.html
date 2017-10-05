@@ -17,61 +17,55 @@
 <br>
 <button type="button" onclick="doReset()">Reset</button>
 
-<div>
+<div style="margin-top: 10px;">
     <p> Scale </p>
-    <input type="text" id="lambda1">Lambda 1</input>
-    <input type="text" id="lambda2">Lambda 2</input>
+    <input type="text" id="lambda1" placeholder= "Lambda 1"></input>
+    <input type="text" id="lambda2" placeholder="Lambda 2"></input>
     <button type="button" onclick="doScaling()">Go!</button>
 </div>
-<br></br>
+
 
 
 <!-- New stuff :) -->
-<div>
+<div style="margin-top: 10px;">
     <p> Translate </p>
-    <input type="text" id="addX">X</input>
-    <input type="text" id="addY">Y</input>
+    <input type="text" id="addX" placeholder="X"></input>
+    <input type="text" id="addY" placeholder="Y"></input>
     <button type="button" onclick="doTranslation()">Go!</button>
 </div>
-<br></br>
 
-<div>
-    <p> Rotate </p>
-    <input type="text" id="angle">Angle</input>
+<div style="margin-top: 10px;">
+    <p> Rotate </p> Angle:
+    <input type="text" id="angle"> º </input>
     <button type="button" onclick="doRotation()">Go!</button>
 </div>
-<br></br>
 
-<div>
+<div style="margin-top: 10px;">
     <p> Reflection x-axis </p>
     <button type="button" onclick="doReflection()">Go!</button>
 </div>
-<br></br>
 
-<div>
+<div style="margin-top: 10px;">
     <p> Let's play with rotations and translations </p>
     <button type="button" onclick="doTandR()">Translation and Rotation</button>
     <button type="button" onclick="doRandT()">Rotation and Translation</button>
 </div>
-<br></br>
 
-<div>
+<div style="margin-top: 10px;">
     <p> Reflection with respect to a given line </p>
-	<p> Y = mX + b </p>
-    <input type="text" id="m">m</input>
-    <input type="text" id="b">b</input>
+     Y = 
+    <input type="text" id="m">X + </input>
+    <input type="text" id="b"></input>
     <button type="button" onclick="doNewReflection()"> Go! </button>
 </div>
-<br></br>
 
-<div>
+<div style="margin-top: 10px;">
     <p> Parallel projection </p>
 	<!--<p> Give value X = 1 if you want to do the parallel projection over </p> -->
-    <input type="text" id="u1">u1</input>
-    <input type="text" id="u2">u2</input>
+    <input type="text" id="u1" placeholder="u1"></input>
+    <input type="text" id="u2"placeholder="u2"></input>
     <button type="button" onclick="doParallelProjection()"> Go! </button>
 </div>
-<br></br>
 
 
 <script type="text/javascript">
@@ -322,6 +316,7 @@
     
     var rotationFunction = function(point){
         var angle = document.getElementById("angle").value;
+        angle = angle*math.pi/180.0;
         var matrix = math.matrix([[math.cos(angle), -math.sin(angle)],
                                   [math.sin(angle), math.cos(angle)]]);
         var pointAsArray = [point.x, point.y];
@@ -360,6 +355,7 @@
         
         
         var angle = document.getElementById("angle").value;
+        angle = angle*math.pi/180.0;
         var matrix = math.matrix([[math.cos(angle), -math.sin(angle)],
                                   [math.sin(angle), math.cos(angle)]]);
         var pointAsArray = [transformedPoint.x, transformedPoint.y];
@@ -378,6 +374,7 @@
     
     var RandTFunction = function(point){
         var angle = document.getElementById("angle").value;
+        angle = angle*math.pi/180.0;
         var matrix = math.matrix([[math.cos(angle), -math.sin(angle)],
                                   [math.sin(angle), math.cos(angle)]]);
         var pointAsArray = [point.x, point.y];
@@ -401,16 +398,16 @@
     
     var newReflectionFunction = function(point){
 	// y = mx + b
-		var m = document.getElementById("m").value;
-		var b = document.getElementById("b").value;
-		
-		var pointsAsArray = [point.x, point.y, 1];
-		var matrix = math.matrix([[-(m*m - 1)/(m*m + 1),		2*m/(m*m + 1), 			-2*m*b/(m*m + 1)],
-								 [2*m/(m*m + 1), 			(m*m - 1)/(m*m + 1), 	2*b/(m*m + 1)],
-								 [0, 						0,						1]]);
-		var result = math.multiply(matrix, pointsAsArray);
-		var newTransformedPoint = {x: result.get([0]), y: result.get([1])};
-		return newTransformedPoint;
+        var m = document.getElementById("m").value;
+	var b = document.getElementById("b").value;
+        
+        var pointsAsArray = [point.x, point.y, 1];
+        var matrix = math.matrix([[-(m*m - 1)/(m*m + 1),   2*m/(m*m + 1),         -2*m*b/(m*m + 1)],
+                                          [2*m/(m*m + 1),          (m*m - 1)/(m*m + 1),    2*b/(m*m + 1)],
+                                          [0,                      0,                     1]]);
+        var result = math.multiply(matrix, pointsAsArray);
+        var newTransformedPoint = {x: result.get([0]), y: result.get([1])};
+        return newTransformedPoint;
     }
     
 
@@ -454,6 +451,14 @@
 		drawCanvas();
 	}
 	
+	/* FALTA PER L'ENTREGA:
+            - Central projection
+            - Comprovar parallel projection i la reflection
+            - Exercici 4 => Resposta parallel
+            - Afegir més camps a la parallel projection (sobre quins plans es pot fer, etc..)
+	
+	
+	*/
 
 </script>
 </body>
