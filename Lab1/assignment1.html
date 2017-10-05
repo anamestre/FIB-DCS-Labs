@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,10 +57,19 @@
 
 <div>
     <p> Reflection with respect to a given line </p>
-    <input type="text" id="id_B">X</input>
-    <input type="text" id="id_A">Y</input>
-    <input type="text" id="id_C">...</input>
-    <button type="button" onclick="doReflection()"> Go! </button>
+	<p> Y = mX + b </p>
+    <input type="text" id="m">m</input>
+    <input type="text" id="b">b</input>
+    <button type="button" onclick="doNewReflection()"> Go! </button>
+</div>
+<br></br>
+
+<div>
+    <p> Parallel projection </p>
+	<!--<p> Give value X = 1 if you want to do the parallel projection over </p> -->
+    <input type="text" id="u1">u1</input>
+    <input type="text" id="u2">u2</input>
+    <button type="button" onclick="doParallelProjection()"> Go! </button>
 </div>
 <br></br>
 
@@ -391,39 +399,61 @@
         drawCanvas();
     }
     
-    var reflectionFunction = function(point){
-        var a = document.getElementById("id_A").value;
-        var b = document.getElementById("id_B").value;
-        var c = document.getElementById("id_C").value;
-        var x = getReflectedX(point.x, point.y, a, b, c);
-        var y = getReflectedY(point.x, point.y, a, b, c);
-        var transformedPoint = {x: x, y: y};
-        return transformedPoint;
+    var newReflectionFunction = function(point){
+	// y = mx + b
+		var m = document.getElementById("m").value;
+		var b = document.getElementById("b").value;
+		
+		var pointsAsArray = [point.x, point.y, 1];
+		var matrix = math.matrix([[-(m*m - 1)/(m*m + 1),		2*m/(m*m + 1), 			-2*m*b/(m*m + 1)],
+								 [2*m/(m*m + 1), 			(m*m - 1)/(m*m + 1), 	2*b/(m*m + 1)],
+								 [0, 						0,						1]]);
+		var result = math.multiply(matrix, pointsAsArray);
+		var newTransformedPoint = {x: result.get([0]), y: result.get([1])};
+		return newTransformedPoint;
     }
     
-    function getReflectedX(firstX, firstY, a, b, c){
-        var a2 = a*a;
-        var b2 = b*b;
-        var firstPart = firstX*(a2 - b2);
-        var secondPart =  2*b*(a*firstY + c);
-        return (firstPart - secondPart)/(a2 + b2);
-    }
-    
-    
-    function getReflectedY(firstX, firstY, a, b, c){
-        var a2 = a*a;
-        var b2 = b*b;
-        var firstPart = firstY*(b2 - a2);
-        var secondPart = 2*a*(b*firstX + c);
-        return (firstPart - secondPart)/(a2 + b2);
-    }
-    
-    function doReflection(){
-        myTransformation = reflectionFunction;
+
+    function doNewReflection(){
+        myTransformation = newReflectionFunction;
         drawCanvas();
     }
 
-
+	
+	// **************************************************************
+    // ************************ PROBLEM 3 ***************************
+    // **************************************************************
+	
+	// Y = 0
+	var parallelProjectionY = function(point){
+		var pointsAsArray = [point.x, point.y];
+		var u1 = document.getElementById("u1").value;
+		var u2 = document.getElementById("u2").value;
+		
+		var matrix = math.matrix([[1, -u1/u2],
+								  [0, 0]]);
+		var result = math.multiply(matrix, pointsAsArray);
+		var newTransformedPoint = {x: result.get([0]), y: result.get([1])};
+		return newTransformedPoint;
+	}
+	
+	var parallelProjectionX = function(point){
+		var pointsAsArray = [point.x, point.y];
+		var u1 = document.getElementById("u1").value;
+		var u2 = document.getElementById("u2").value;
+		
+		var matrix = math.matrix([[0, 0],
+								  [-u2/u1, 1]]);
+		var result = math.multiply(matrix, pointsAsArray);
+		var newTransformedPoint = {x: result.get([0]), y: result.get([1])};
+		return newTransformedPoint;
+	}
+	
+	function doParallelProjection(){
+		myTransformation = parallelProjectionY;
+		drawCanvas();
+	}
+	
 
 </script>
 </body>
