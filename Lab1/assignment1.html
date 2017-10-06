@@ -68,6 +68,20 @@
 </div>
 
 
+<div style="margin-top: 10px;">
+    <p> Central projection </p>
+	<!--<p> Give value X = 1 if you want to do the parallel projection over </p> -->
+    <input type="text" id="p1" placeholder="X"></input>
+    <input type="text" id="p2"placeholder="Y"></input>
+    <button type="button" onclick="doCentralProjection()"> Go! </button>
+</div>
+
+<div style="margin-top: 10px;">
+    <p> Which method preserves affine combination? </p>
+    Parallel projection: As I added colours to the vertices, if you take 3 points, the middle point should be exactly in the middle in the parallel projection.
+        
+</div>
+
 <script type="text/javascript">
 
     /*
@@ -86,10 +100,20 @@
         myTransformation = function(p){return p}; //Identity transform
 
         // default styles
-        style = {
+        /*style = {
             curve:	{ width: 6, color: "#333" },
             line:	{ width: 1, color: "#C00" },
             point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
+        }*/
+        
+        var colors = ["#ff80b3", "#99b3ff", "#99ffcc", "#ffff99", "#ad33ff", 
+                      "#b3003b", "#d2a679", "#003366", "#ffcc99", "#ebebe0"];
+        style = [];
+        
+        for(var i = 0; i < points.length; ++i){
+            style[i] = { curve:	{ width: 6, color: "#333" },
+            line:	{ width: 1, color: "#C00" },
+            point: { radius: 10, width: 2, color: colors[i], fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI } }
         }
 
         // line style defaults
@@ -118,7 +142,7 @@
 
 
     // draw canvas
-    function drawCanvas() {
+   /* function drawCanvas() {
         // Clear everything
         context1.clearRect(-canvas1.width/2, -canvas1.height/2, canvas1.width, canvas1.height);  // Clear canvas
         context2.clearRect(-canvas2.width/2, -canvas2.height/2, canvas2.width, canvas2.height);  // Clear canvas
@@ -133,6 +157,29 @@
 
         // Transformed points
         drawCurve(context2, style, points, myTransformation); // Draw curve transformed
+    }*/
+    
+    function drawCanvas() {
+        // Clear everything
+        context1.clearRect(-canvas1.width/2, -canvas1.height/2, canvas1.width, canvas1.height);  // Clear canvas
+        context2.clearRect(-canvas2.width/2, -canvas2.height/2, canvas2.width, canvas2.height);  // Clear canvas
+
+        // Background grids
+        drawGrid(context1,canvas1.width, canvas1.height); // Draw background grid
+        drawGrid(context2,canvas2.width, canvas2.height); // Draw background grid
+
+        var newPoints = []
+        
+        for (var i = 0; i < points.length; i++)
+            newPoints[i] =  myTransformation(points[i]);
+            
+        // Original points and vertices
+        drawCurve(context1, style, points); // Draw curve
+        drawVertices(context1, style, points); // Draw vertices as circles
+
+        // Transformed points
+        drawCurve(context2, style, points, myTransformation); // Draw curve transformed
+        drawVertices(context2, style, newPoints); // Draw vertices as circles
     }
 
 
@@ -170,8 +217,8 @@
         }
 
         // Draw curve
-        ctx.lineWidth = style.curve.width;
-        ctx.strokeStyle = style.curve.color;
+        ctx.lineWidth = style[0].curve.width;
+        ctx.strokeStyle = style[0].curve.color;
         ctx.beginPath();
         var firstPoint = transformation(points[0]);
         var currentPoint;
@@ -188,11 +235,11 @@
     function drawVertices (ctx, style, points) {
         for (var i = 0; i < points.length; i++) {
             var p = points[i];
-            ctx.lineWidth = style.point.width;
-            ctx.strokeStyle = style.point.color;
-            ctx.fillStyle = style.point.fill;
+            ctx.lineWidth = style[i].point.width;
+            ctx.strokeStyle = style[i].point.color;
+            ctx.fillStyle = style[i].point.fill;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, style.point.radius, style.point.arc1, style.point.arc2, true);
+            ctx.arc(p.x, p.y, style[i].point.radius, style[i].point.arc1, style[i].point.arc2, true);
             ctx.fill();
             ctx.stroke();
         }
@@ -212,7 +259,7 @@
         for (var i=0; i<points.length;i++) {
             dx = points[i].x - pos.x;
             dy = points[i].y - pos.y;
-            if ((dx * dx) + (dy * dy) < style.point.radius * style.point.radius) {
+            if ((dx * dx) + (dy * dy) < style[0].point.radius * style[0].point.radius) {
                 drag = i;
                 draggedPoint = pos;
                 canvas1.style.cursor = "move";
@@ -451,14 +498,20 @@
 		drawCanvas();
 	}
 	
-	/* FALTA PER L'ENTREGA:
-            - Central projection
-            - Comprovar parallel projection i la reflection
-            - Exercici 4 => Resposta parallel
-            - Afegir més camps a la parallel projection (sobre quins plans es pot fer, etc..)
+	var centralProjection = function(point){
+		var p1 = document.getElementById("p1").value;
+		var p2 = document.getElementById("p2").value;
+		
+		var newValue = (p1*point.y)/(-p2 + point.y) + (1 - (point.y/(-p2 + point.y)))*point.x;
+		var newTransformedPoint = {x: newValue, y: 0};
+		return newTransformedPoint;
+	}
 	
-	
-	*/
+	function doCentralProjection() {
+        myTransformation = centralProjection;
+        drawCanvas();
+	}
+  
 
 </script>
 </body>
