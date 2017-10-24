@@ -31,17 +31,28 @@
         // ... and append it to the DOM
         document.body.appendChild(renderer.domElement);
 
+        /* ----------- Spiral ------------- */
         var lineGeom = new THREE.Geometry();
-
-        buildGeometry(lineGeom);
+        buildSpiral(lineGeom);
 
         var lineMat = new THREE.LineBasicMaterial( {
-            color:  0xA000A0  // purple; the default is white
+            color:  0xE33653  // pink
         } );
 
-        var line = new THREE.Line( lineGeom, lineMat, THREE.LineStrip );
-
+        var line = new THREE.Line(lineGeom, lineMat, THREE.LineStrip);
         this.scene.add(line);
+        
+        
+        /* ----------- Ellipse ------------- */
+        var lineGeom2 = new THREE.Geometry();
+        buildEllipse(lineGeom2);
+
+        var lineMat2 = new THREE.LineBasicMaterial( {
+            color:  0x1AC3FF  // blue
+        } );
+
+        var line2 = new THREE.Line(lineGeom2, lineMat2, THREE.LineStrip);
+        this.scene.add(line2); 
 
 
         // Add some light
@@ -105,11 +116,21 @@
          *  TODO: Change this function to draw a different curve
          */
 
-        function buildGeometry(lineGeometry) {
-			var sign=1;
-            for (var i=0;i<50;i++){
-				lineGeom.vertices.push(new THREE.Vector3(0.5*i,i,sign*i));
-				sign = -sign;
+        function buildSpiral(lineGeometry) {
+            for (var i = 0; i < 50; i += 0.5){
+                var first = 0.5*i*Math.cos(i);
+                var second = i;
+                var third = 0.5*i*Math.sin(i);
+                lineGeom.vertices.push(new THREE.Vector3(first, second, third));
+            }
+        }
+        
+        function buildEllipse(lineGeometry) {
+            for (var i = 0; i < 50; i += 0.5){
+                var first = 5*Math.cos(i);
+                var second = 2*i;
+                var third = 2*Math.sin(i);
+                lineGeom.vertices.push(new THREE.Vector3(first, second, third));
             }
         }
 	  

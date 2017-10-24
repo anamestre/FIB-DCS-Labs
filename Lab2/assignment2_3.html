@@ -104,9 +104,11 @@
         var firstPoint = points[0];
         var currentPoint;
         ctx.moveTo(firstPoint.x, firstPoint.y);
-        for (var i = 0; i < 10; i=i+0.2) {
-			// TODO: replace this by the right parametrization
-            currentPoint =  {x:50*i, y:50*math.sin(-i+0.5*Math.random())};
+        for (var i = 0; i < 50; i=i+0.2) {
+            // TODO: replace this by the right parametrization
+            var first = 20*(i - Math.sin(i));
+            var second = -20 * (1 - Math.cos(i));
+            currentPoint =  {x:first, y:second};
             ctx.lineTo(currentPoint.x, currentPoint.y);
             ctx.moveTo(currentPoint.x, currentPoint.y);
         }
