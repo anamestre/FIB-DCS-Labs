@@ -27,7 +27,8 @@
         * http://blogs.sitepoint.com/html5-canvas-draw-bezier-curves/
     */
 
-    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, newStyle;
+    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, newStyle, reflectedStyle;
+    var verticalLines;
 
     // TODO replace these points but those of the corresponding conic function (on-the-fly)
     points = [{ x:0, y:0 }];
@@ -45,9 +46,23 @@
         
         newStyle = {
             curve:	{ width: 6, color: "#8cbeb2" },
-            line:	{ width: 2, color: "#8cbeb2" },
+            line:	{ width: 1, color: "#8cbeb2" },
             point: { radius: 10, width: 2, color: "#8cbeb2", fill: "rgba(244,114,208,0.5)", arc1: 0, arc2: 2 * Math.PI }
         }
+        
+        reflectedStyle = {
+            curve:	{ width: 6, color: "#00ff84" },
+            line:	{ width: 1.5, color: "#00ff84" },
+            point: { radius: 10, width: 2, color: "#00ff84", fill: "rgba(244,114,208,0.5)", arc1: 0, arc2: 2 * Math.PI }
+        }
+        
+        verticalLines = [
+                [{x: -125, y:78.125}, {x: -125, y:500}],
+                [{x: -75, y:28.125}, {x: -75, y:500}],
+                [{x: -25, y:3.125}, {x: -25, y:500}],
+                [{x: 25, y:3.125}, {x: 25, y: 500}],
+                [{x: 75, y:28.125}, {x: 75, y: 500}],
+                [{x: 125, y:78.125}, {x: 125, y:500}]];
 
         // line style defaults
         context1.lineCap = "round";
@@ -71,7 +86,7 @@
     // draw canvas
     function drawCanvas() {
         // Clear everything
-        context1.clearRect(0, 0, canvas1.width, canvas1.height);  // Clear canvas
+        //context1.clearRect(0, 0, canvas1.width, canvas1.height);  // Clear canvas
 
         // Background grids
         drawGrid(context1,canvas1.width, canvas1.height); // Draw background grid
@@ -167,27 +182,53 @@
     // This is just an example
     function computeConic() {
         conic();
-        drawCanvas();
         draw6verticalLines();
+        drawReflectedLines();
         drawCanvas();
     }
     
     function conic(){
         points = [];
-        for(var x = -300; x <= 300; x+= 25){
-            var y = (x*x)/200;
+        for(var x = -400; x <= 400; x+= 25){
+            var y = (x*x)/200; // Input function -> Parabola function
             points.push({x: x, y: y});
         }
     }
     
     function draw6verticalLines(){
-        var verticalLines = [[
-                {x: 25, y:3.125}, {x: 25, y: 400}]];
         for(var i = 0; i < verticalLines.length; i += 1){
             drawCurve(context1, newStyle, verticalLines[i]);
         }
     }
+    
+    function drawReflectedLines(){
+        var sign = 1;
+        for(var i = 0; i < verticalLines.length; ++i){
+            if(i >= 3) sign = -1;
+            drawReflectedLine(verticalLines[i], sign);
+        }
+    }
+    
+    function drawReflectedLine(line, sign){
+        var p = [{x: line[0].x, y: line[0].y}];
+        var tangent = p[0].x / 100.0;
+        var alpha = Math.atan(tangent);
+        var beta = Math.PI / 2.0 - alpha;
+        var line2 = Math.tan(alpha - beta + Math.PI);
+        var resLine = reflect(line2, line[0].x, line[0].y );
+        console.log("y = " + String(resLine.m) + "x + (" + String(resLine.a) + ")");
+        
+        p.push({x: sign*400, y: resLine.m * (sign*400) + resLine.a});
+        drawCurve(context1, reflectedStyle, p);
+    }
+    
+    function reflect(m, x, y){
+        return {m: m, a:m*(-x) + y};
+    }
 
 </script>
 </body>
+
+    <p> The focus is just where all the reflected lines intersect, in this case x = 0, y = 50 </p>
+
 </html>
