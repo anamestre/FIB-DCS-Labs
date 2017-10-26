@@ -27,7 +27,7 @@
         * http://blogs.sitepoint.com/html5-canvas-draw-bezier-curves/
     */
 
-    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint;
+    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, newStyle;
 
     // TODO replace these points but those of the corresponding conic function (on-the-fly)
     points = [{ x:0, y:0 }];
@@ -40,7 +40,13 @@
         style = {
             curve:	{ width: 6, color: "#333" },
             line:	{ width: 1, color: "#C00" },
-            point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
+            point: { radius: 10, width: 2, color: "#900", fill: "rgba(244,114,208,0.5)", arc1: 0, arc2: 2 * Math.PI }
+        }
+        
+        newStyle = {
+            curve:	{ width: 6, color: "#8cbeb2" },
+            line:	{ width: 2, color: "#8cbeb2" },
+            point: { radius: 10, width: 2, color: "#8cbeb2", fill: "rgba(244,114,208,0.5)", arc1: 0, arc2: 2 * Math.PI }
         }
 
         // line style defaults
@@ -160,9 +166,26 @@
 
     // This is just an example
     function computeConic() {
-        // to something
-        alert('Code to be written!');
+        conic();
         drawCanvas();
+        draw6verticalLines();
+        drawCanvas();
+    }
+    
+    function conic(){
+        points = [];
+        for(var x = -300; x <= 300; x+= 25){
+            var y = (x*x)/200;
+            points.push({x: x, y: y});
+        }
+    }
+    
+    function draw6verticalLines(){
+        var verticalLines = [[
+                {x: 25, y:3.125}, {x: 25, y: 400}]];
+        for(var i = 0; i < verticalLines.length; i += 1){
+            drawCurve(context1, newStyle, verticalLines[i]);
+        }
     }
 
 </script>
