@@ -117,22 +117,24 @@
          */
 
         function buildSpiral(lineGeometry) {
-            for (var i = 0; i < 50; i += 0.5){
+            for (var i = 0; i < 100; i += 0.1){
                 var first = 0.5*i*Math.cos(i);
-                var second = i;
+                var second = i*0.5;
                 var third = 0.5*i*Math.sin(i);
-                lineGeom.vertices.push(new THREE.Vector3(first, second, third));
+                lineGeometry.vertices.push(new THREE.Vector3(first, second, third));
             }
         }
         
         function buildEllipse(lineGeometry) {
-            for (var i = 0; i < 50; i += 0.5){
+            for (var i = 0; i < 100; i += 0.1){
                 var first = 5*Math.cos(i);
-                var second = 2*i;
-                var third = 2*Math.sin(i);
-                lineGeom.vertices.push(new THREE.Vector3(first, second, third));
+                var second = i*0.5;
+                var third = 3*Math.sin(i);
+                lineGeometry.vertices.push(new THREE.Vector3(first, second, third));
             }
         }
+        
+
 	  
 	  </script>
       <br>
