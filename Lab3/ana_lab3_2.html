@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,51 +9,50 @@
     <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
 </head>
 <body>
-<h1>DCS - 3.1. Cubic Lagrange interpolation</h1>
+<h1>DCS - 3.2. Runge's phenomenon</h1>
 <canvas id="canvas1" height="600" width="800" class="bezier"  style="border:1px solid #d3d3d3;"></canvas>
 <br>
-<button id="uniform" onclick="drawUniform()">Uniform parameter values</button>
-<button id="distance" onclick="drawDistance()">Distance between consecutive interpolated points</button>
-<button id="ana_criteria" onclick="drawOther()">Other</button>
-<button id="all" onclick="drawAll()">All criterias</button>
+<input id="number"> Number of points</input>
+<button onclick="drawInterpolation()"> Go! </button>
 <script type="text/javascript">
     /*
     * Part of this code is based on:
         * http://blogs.sitepoint.com/html5-canvas-draw-quadratic-curves/
         * http://blogs.sitepoint.com/html5-canvas-draw-bezier-curves/
     */
-    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, method, styleUniform, styleDistance, styleOther;
-    points = [{ x:100, y:100 },{ x:200, y:300 },{ x:350, y:200 }, { x:600, y:350 }];
+    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, style2, partitions = 10, scalingFactor = 200, func, resultantInterpolation = [];
     function init() {
         myTransformation = function(p){return p}; //Identity transform
         // default styles
         style = {
             curve:	{ width: 6, color: "#333" },
             line:	{ width: 1, color: "#C00" },
-            point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
+            point: { radius: 5, width: 2, color: "0", fill: "rgba(0,0,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
         }
-		styleUniform = {
+		
+		style2 = {
             curve:	{ width: 6, color: "#EF4EEA" },
             line:	{ width: 1, color: "#EF4EEA" },
-            point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
-        }
-		styleDistance = {
-            curve:	{ width: 6, color: "#5098E0" },
-            line:	{ width: 1, color: "#5098E0" },
-            point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
-        }
-		styleOther = {
-            curve:	{ width: 6, color: "#5AF348" },
-            line:	{ width: 1, color: "#5AF348" },
             point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
         }
         // line style defaults
         context1.lineCap = "round";
         context1.lineJoin = "round";
         // event handlers (only canvas1)
+		/*
         canvas1.onmousedown = dragStart;
         canvas1.onmousemove = dragging;
         canvas1.onmouseup = canvas1.onmouseout = dragEnd;
+		*/
+        // TODO: This is just a stub
+        // Generate the correct points and interpolate them
+        points = new Array();
+        /*for (var i=0;i<13;i++) {
+            points.push({x:100+i*50,y:500});
+        }*/
+		
+		computePoints();
+		
         drawCanvas();
     }
     /**
@@ -119,48 +119,8 @@
             ctx.stroke();
         }
     }
-    /**
-     Methods to allow dragging transformedPoints around
-     **/
-    // start dragging
-    function dragStart(e) {
-        e = mousePos(e);
-        var dx, dy;
-        for (var i=0; i<points.length;i++) {
-            dx = points[i].x - e.x;
-            dy = points[i].y - e.y;
-            if ((dx * dx) + (dy * dy) < style.point.radius * style.point.radius) {
-                drag = i;
-                draggedPoint = e;
-                canvas1.style.cursor = "move";
-                return;
-            }
-        }
-    }
-    // dragging
-    function dragging(e) {
-        if (drag!=null) {
-            e = mousePos(e);
-            points[drag].x += e.x - draggedPoint.x;
-            points[drag].y += e.y - draggedPoint.y;
-            draggedPoint = e;
-            drawCanvas();
-        }
-    }
-    // end dragging
-    function dragEnd(e) {
-        drag = null;
-        canvas1.style.cursor = "default";
-        drawCanvas();
-    }
-    // event parser
-    function mousePos(event) {
-        event = (event ? event : window.event);
-        return {
-            x: event.pageX - canvas1.offsetLeft,
-            y: event.pageY - canvas1.offsetTop
-        }
-    }
+    
+    
     /**
      * Start ("main method")
      */
@@ -171,69 +131,8 @@
     /**
      * Ana's functions
      */
-	
-	function compUniform(){
-        var ts = [0, 1/3, 2/3, 1];
-        method = [];
-        method = LagrangeEquation(ts);
-		
-    }
-	
-	function compDistance(){
-        let d1 = math.distance([points[0].x, points[0].y], [points[1].x, points[1].y]);
-        let d2 = math.distance([points[1].x, points[1].y], [points[2].x, points[2].y]);
-        let d3 = math.distance([points[2].x, points[2].y], [points[3].x, points[3].y]);
-        let sumD = d1 + d2 + d3;
-        var ts = new Array();
-        ts.push(0);
-        ts.push(d1 / sumD);
-        ts.push((d1 + d2) / sumD);
-        ts.push(1);
-        method = [];
-        method = LagrangeEquation(ts);
-    }
-	
-	function compOther(){
-        let r0 = 0;
-        let r1 = math.random(r0, 1);
-        let r2 = math.random(r1, 1);
-        let r3 = 1;
-        var ts = [r0, r1, r2, r3];
-        method = [];
-        method = LagrangeEquation(ts);
-    }
-	
-	function drawUniform(){
-		compUniform();
-		drawCanvas();
-		drawCurve(context1, styleUniform, method);
-	}
-	
-	function drawDistance(){
-		compDistance();
-		drawCanvas();
-		drawCurve(context1, styleDistance, method);
-	}
-	
-	function drawOther(){
-		compOther();
-		drawCanvas();
-		drawCurve(context1, styleOther, method);
-	}
-	
-	function drawAll(){
-		drawCanvas();
-		compUniform();
-		drawCurve(context1, styleUniform, method);
-		
-		compDistance();
-		drawCurve(context1, styleDistance, method);
-		
-		compOther();
-		drawCurve(context1, styleOther, method);
-	}
 	 
-	  function LagrangeEquation(ts){
+	 function LagrangeEquation(ts){
         var res = new Array();
         var strExprx = "";
         var strExpry = "";
@@ -266,11 +165,36 @@
             normT = (i - minT) / (maxT - minT)
             res.push({x: exprx.eval({t: normT}), y: expry.eval({t: normT})});
         }
-		return res;
-		
-	 }    
-
-
+        return res;
+    }
+	
+	function computePoints(){
+        points = new Array();
+        var inc = 2 / (partitions - 1);
+        for (var i=-1;i <= 1;i += inc) {
+            points.push({x: i * scalingFactor, y: -(1 / (1 + 25 * i * i) ) * scalingFactor});
+        }
+        func = new Array();
+        for(var i = -10; i <= 10; i += 1 / (((partitions - 1)))){
+            func.push({x: i * scalingFactor, y: -scalingFactor * (1 / (1 + 25 * i * i))});
+        }
+    }
+	
+	function computeInterpolation(){
+        partitions = Number(document.getElementById('number').value);
+        computePoints();
+        var ts = [];
+        var inc = 1 / (partitions - 1);
+        for (var i = 0; i <= 1; i += inc) ts.push(i);
+        resultantInterpolation = new Array();
+        resultantInterpolation = LagrangeEquation(ts);
+    }
+	
+	function drawInterpolation(){
+		drawCanvas();
+		computeInterpolation();
+		drawCurve(context1, style2, resultantInterpolation);
+	}
 	 
 </script>
 </body>
