@@ -13,14 +13,14 @@
 <canvas id="canvas1" height="600" width="800" class="bezier"  style="border:1px solid #d3d3d3;"></canvas>
 <br>
 <input id="number"> Number of points</input>
-<button onclick="drawInterpolation()"> Go! </button>
+<button onclick="drawRunge()"> Go! </button>
 <script type="text/javascript">
     /*
     * Part of this code is based on:
         * http://blogs.sitepoint.com/html5-canvas-draw-quadratic-curves/
         * http://blogs.sitepoint.com/html5-canvas-draw-bezier-curves/
     */
-    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, style2, partitions = 10, scalingFactor = 200, func, resultantInterpolation = [];
+    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, style2, partitions = 10, scalingFactor = 290, func, resultantInterpolation = [];
     function init() {
         myTransformation = function(p){return p}; //Identity transform
         // default styles
@@ -43,14 +43,17 @@
         canvas1.onmousedown = dragStart;
         canvas1.onmousemove = dragging;
         canvas1.onmouseup = canvas1.onmouseout = dragEnd;
+
 		*/
+		
+        context1.translate(canvas1.width/2,canvas1.height/2);
+		
         // TODO: This is just a stub
         // Generate the correct points and interpolate them
         points = new Array();
         /*for (var i=0;i<13;i++) {
             points.push({x:100+i*50,y:500});
         }*/
-		
 		computePoints();
 		
         drawCanvas();
@@ -61,31 +64,40 @@
     // draw canvas
     function drawCanvas() {
         // Clear everything
-        context1.clearRect(0, 0, canvas1.width, canvas1.height);  // Clear canvas
+        context1.clearRect(-canvas1.width/2, -canvas1.height/2, canvas1.width, canvas1.height); 
+        //context1.clearRect(0, 0, canvas1.width, canvas1.height);
         // Background grids
         drawGrid(context1,canvas1.width, canvas1.height); // Draw background grid
         // Curve through points and vertices
         drawCurve(context1, style, points); // Draw curve
-        drawVertices(context1, style, points); // Draw vertices as circles
+        //drawVertices(context1, style, points); // Draw vertices as circles
     }
     // Draw a background grid
     function drawGrid(myContext,bw,bh){
         var delta = 50; // grid cell size
-        for (var x = 0; x <= bw; x += delta) {
-            myContext.moveTo(x, 0);
-            myContext.lineTo(x, bh);
+
+        var half_width = bw/2;
+        var half_height = bh/2;
+        for (var x = -half_width; x <= half_width; x += delta) {
+            myContext.moveTo(x, -half_height);
+            myContext.lineTo(x, half_height);
         }
-        for (var y = 0; y <= bh; y += delta) {
-            myContext.moveTo(0, y);
-            myContext.lineTo(bw , y);
+
+        for (var y = -half_height; y <= half_height; y += delta) {
+            myContext.moveTo(-half_width, y);
+            myContext.lineTo(half_width , y);
         }
+
         myContext.lineWidth = 1;
         myContext.strokeStyle = "lightgray";
         myContext.stroke();
-        myContext.strokeStyle = "black";
+
+        myContext.fillStyle = "black";
         myContext.font = "12px Arial";
         myContext.fillText("(0,0)",2,12);
     }
+    
+    
     // Draws a polygonal curve connecting the points, after applying the given transformation
     function drawCurve(ctx, style, points, transformation) {
         // The transformation is optional. If none provided, use identity transform
@@ -106,6 +118,8 @@
         }
         ctx.stroke();
     }
+    
+    
     // Draw circles around vertices to facilitate drag and drop
     function drawVertices (ctx, style, points) {
         for (var i = 0; i < points.length; i++) {
@@ -128,50 +142,17 @@
     canvas1 = document.getElementById("canvas1");
     context1 = canvas1.getContext("2d");
     init();
+    
+    
+    
     /**
      * Ana's functions
      */
-	 
-	 function LagrangeEquation(ts){
-        var res = new Array();
-        var strExprx = "";
-        var strExpry = "";
-        for (var i = 0; i < ts.length; i++){
-            if (i != 0){
-                strExprx += " + ";
-                strExpry += " + ";
-            }
-
-            strExprx += "(";
-            strExpry += "(";
-
-            for (var j = 0; j < ts.length; j++){
-                if (i != j){
-                    strExprx += "(t - " + ts[j] + " ) / (" + ts[i] + " - " + ts[j] + ")";
-                    strExpry += "(t - " + ts[j] + " ) / (" + ts[i] + " - " + ts[j] + ")";
-                }
-            }
-
-            strExprx += ") * " + points[i].x + " ";
-            strExpry += ") * " + points[i].y + " ";
-        }
-        var exprx = math.parse(strExprx);
-        var expry = math.parse(strExpry);
-
-        var normT, minT, maxT;
-        minT = -10;
-        maxT = 10;
-        for(var i = -10; i <= 10; i += 0.1){
-            normT = (i - minT) / (maxT - minT)
-            res.push({x: exprx.eval({t: normT}), y: expry.eval({t: normT})});
-        }
-        return res;
-    }
 	
 	function computePoints(){
         points = new Array();
-        var inc = 2 / (partitions - 1);
-        for (var i=-1;i <= 1;i += inc) {
+        var inc = 0.01;
+        for (var i=-2;i <= 2;i += inc) {
             points.push({x: i * scalingFactor, y: -(1 / (1 + 25 * i * i) ) * scalingFactor});
         }
         func = new Array();
@@ -180,21 +161,38 @@
         }
     }
 	
-	function computeInterpolation(){
-        partitions = Number(document.getElementById('number').value);
-        computePoints();
-        var ts = [];
-        var inc = 1 / (partitions - 1);
-        for (var i = 0; i <= 1; i += inc) ts.push(i);
-        resultantInterpolation = new Array();
-        resultantInterpolation = LagrangeEquation(ts);
-    }
+	function drawRunge() {
+        n = parseInt(document.getElementById("number").value);
+        points2 = [];
+        var num, den, x, funci, js, res;
+        
+        // interval [-1, 1]
+        for (var t = -1; t <= 1; t += 0.01) {
+            res = 0;
+            
+            for (var i = 1;i <= n + 1; ++i) {
+                num = 1;
+                den = 1; 
+                x = (-1 + (i-1)*(2/n));  // xi value
+                funci = (1/(1 + 25*x*x)) // function f(x)
+                
+                for (var j = 1; j <= n + 1; ++j) {
+                    js = (-1 + (j-1)*(2/n));                    
+                    if (i != j) {
+                        num *= (t - js); 
+                        den *= (x - js);
+                    }
+                }
+            
+            res += (num/den)*funci;
+            }
+            points2.push({x: -t*scalingFactor, y: -res*scalingFactor})
+        }
+        drawCanvas()
+        drawCurve(context1, style2, points2); // Draw curve
+     }
 	
-	function drawInterpolation(){
-		drawCanvas();
-		computeInterpolation();
-		drawCurve(context1, style2, resultantInterpolation);
-	}
+	
 	 
 </script>
 </body>
