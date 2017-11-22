@@ -16,6 +16,8 @@
 <canvas id="canvas1" height="600" width="800" class="bezier"  style="border:1px solid #d3d3d3;"></canvas>
 <br>
 
+<button onClick="computeHermiteInterp()"> Hermite interpolation </button>
+
 <script type="text/javascript">
 
     /*
@@ -23,8 +25,10 @@
         * http://blogs.sitepoint.com/html5-canvas-draw-quadratic-curves/
         * http://blogs.sitepoint.com/html5-canvas-draw-bezier-curves/
     */
-
     var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint;
+    
+    // my own variables 
+    var pinkStyle, vectors;
 
     points = [{ x:300, y:300 },{ x:200, y:200 },{ x:400, y:300 },{ x:500, y:300 }];
 
@@ -38,6 +42,12 @@
             line:	{ width: 1, color: "#C00" },
             point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
         }
+        
+        pinkStyle = {
+            curve:	{ width: 6, color: "#EF4EEA" },
+            //line:	{ width: 1, color: "#EF4EEA" },
+            //point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
+        }
 
         // line style defaults
         context1.lineCap = "round";
@@ -47,6 +57,8 @@
         canvas1.onmousedown = dragStart;
         canvas1.onmousemove = dragging;
         canvas1.onmouseup = canvas1.onmouseout = dragEnd;
+        
+        vectors = [{x: points[1].x - points[0].x, y: points[1].y - points[0].y}, {x: points[2].x - points[3].x, y: points[2].y - points[3].y}];
 
         drawCanvas();
     }
@@ -192,6 +204,45 @@
     /**
      * Auxiliary functions
      */
+     
+     function computeHermiteInterp(){
+            var hPoints = getHermiteInterpolation(points[1], points[2], vectors[0], vectors[1]);
+            drawCanvas();
+            drawCurve(context1, pinkStyle, hPoints);
+     }  
+    
+    function getHermiteInterpolation(point0, point1, m0, m1){
+        
+            var x1, y1, p0, p1, v0, v1;
+            var p0y, p1y, v0y, v1y;
+            var hPoints = new Array();
+            for (var i = 0; i < 1.0; i += 0.05){
+                var ii = i*i;
+                var iii = ii * i;
+                
+                p0 = 2*iii - 3*ii + 1;
+                p0y = p0 * point0.y;
+                p0 = p0 * point0.x;
+                p1 = -2*iii + 3*ii;
+                p1y = p1 * point1.y;
+                p1 = p1 *point1.x;
+                
+                v0 = iii -2*ii + i;
+                v0y = v0 * m0.y;
+                v0 = v0 * m0.x;
+                v1 = iii - ii;
+                v1y = v1 * m1.y;
+                v1 = v1 * m1.x;
+                
+                x1 = p0 + p1 + v0 + v1;
+                y1 = p0y + p1y + v0y + v1y;
+                
+                hPoints.push({x: x1, y: y1});
+            }
+        
+        return hPoints;
+    
+    }
 
 
 </script>
