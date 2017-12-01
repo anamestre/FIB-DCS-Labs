@@ -15,6 +15,10 @@
 
 <canvas id="canvas1" height="600" width="800" class="bezier"  style="border:1px solid #d3d3d3;"></canvas>
 <br>
+<!-- <input id="pointX"> X </input>
+<input id="pointY"> Y </input> 
+<button onClick="addControlPoint()">Add point!</button> -->
+<button onClick="addControlPoints()">Add control points!</button>
 
 <script type="text/javascript">
 
@@ -24,7 +28,7 @@
         * http://blogs.sitepoint.com/html5-canvas-draw-bezier-curves/
     */
 
-    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint;
+    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, pinkStyle;
 
     points = [{ x:100, y:300 },{ x:200, y:300 },{ x:300, y:300 },{ x:400, y:300 }];
 
@@ -36,6 +40,12 @@
         style = {
             curve:	{ width: 6, color: "#333" },
             line:	{ width: 1, color: "#C00" },
+            point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
+        }
+        
+        pinkStyle = {
+            curve:	{ width: 6, color: "#EF4EEA" },
+            line:	{ width: 1, color: "#EF4EEA" },
             point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
         }
 
@@ -68,6 +78,7 @@
         // Curve through points and vertices
         drawCurve(context1, style, points); // Draw curve
         drawVertices(context1, style, points); // Draw vertices as circles
+        bezierCurve();
 
     }
 
@@ -192,6 +203,50 @@
     /**
      * Auxiliary functions
      */
+     
+     function factorial(n){
+        if (n <= 1) return 1;
+        else return n* factorial(n - 1);
+     }
+     
+     
+     // n sobre i
+     function binomial(n, i){
+        var factN = factorial(n);
+        var factI = factorial(i);
+        var factNI = factorial(n - i);
+        return factN / (factI * factNI);
+     }
+     
+     function bezierCurve(){
+        var n = points.length - 1;
+        var points2 = [];
+        
+        for(var t = 0; t < 1; t += 0.01){
+            var px = 0, py = 0;
+            for(var i = 0; i <= n; ++i){
+                var bni = binomial(n, i) * Math.pow(t, i) * Math.pow(1 - t, n - i);
+                px += bni*points[i].x;
+                py += bni*points[i].y;
+            }
+            points2.push({x: px, y: py});
+        }
+        
+        drawCurve(context1, pinkStyle, points2); // Draw curve
+        //drawVertices(context1, pinkStyle, points2); // Draw vertices as circles
+     }
+     
+     function addControlPoint(){
+        var px = parseInt(document.getElementById("pointX").value);
+        var py = parseInt(document.getElementById("pointY").value);
+        points.push({x: px, y: py});
+        drawCanvas();
+     }
+     
+     function addControlPoints(){
+     
+     
+     }
 
 
 </script>
