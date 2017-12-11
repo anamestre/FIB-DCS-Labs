@@ -16,7 +16,21 @@
 <canvas id="canvas1" height="600" width="800" class="bezier"  style="border:1px solid #d3d3d3;"></canvas>
 <br>
 
-<button onClick="computeHermiteInterp()"> Hermite interpolation </button>
+<!--<button onClick="computeHermiteInterp()"> Hermite interpolation </button> -->
+<!-- <button onClick="partHermiteInterp()"> Particular Hermite interpolation </button> -->
+
+<h2> Problem 2</h2>
+<p> A. vector0 = (400, 400), vector1 = (400, 0) </p>
+<p> B. As you enlarge the tangent vectors, the curve gets more "curvature", this is because the norm of
+    the vectors are getting larger. </p>
+<p> C. When you invert the direction of the tangent vectors obviously the curve gets inverted </p>
+
+<h2> Problem 3 </h2>
+<p> A. When the points coincide you get a loop that begins and ends in the same point </p>
+<p> B. When the points coincide and the two tangent vectors are (0, 0) you get a point </p>
+<p> C. When the tangent vectors are equal to the vector P1 - P0  you get a linear segment that is just the   connection between the 2 points </p>
+
+
 
 <script type="text/javascript">
 
@@ -25,7 +39,7 @@
         * http://blogs.sitepoint.com/html5-canvas-draw-quadratic-curves/
         * http://blogs.sitepoint.com/html5-canvas-draw-bezier-curves/
     */
-    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint;
+    var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint, part = false;
     
     // my own variables 
     var pinkStyle, vectors;
@@ -58,8 +72,7 @@
         canvas1.onmousemove = dragging;
         canvas1.onmouseup = canvas1.onmouseout = dragEnd;
         
-        vectors = [{x: points[1].x - points[0].x, y: points[1].y - points[0].y}, {x: points[2].x - points[3].x, y: points[2].y - points[3].y}];
-
+        
         drawCanvas();
     }
 
@@ -76,10 +89,12 @@
 
         // Background grids
         drawGrid(context1,canvas1.width, canvas1.height); // Draw background grid
-
+        
         // Curve through points and vertices
         drawCurve(context1, style, points); // Draw curve
         drawVertices(context1, style, points); // Draw vertices as circles
+        
+        computeHermiteInterp();
 
     }
 
@@ -206,9 +221,12 @@
      */
      
      function computeHermiteInterp(){
+            vectors = [{x: points[1].x - points[0].x, y: points[1].y - points[0].y}, {x: points[3].x - points[2].x, y: points[3].y - points[2].y}];
+
             var hPoints = getHermiteInterpolation(points[1], points[2], vectors[0], vectors[1]);
-            drawCanvas();
+            //drawCanvas();
             drawCurve(context1, pinkStyle, hPoints);
+            drawVertices(context1, pinkStyle, hPoints); // Draw vertices as circles
      }  
     
     function getHermiteInterpolation(point0, point1, m0, m1){
@@ -216,7 +234,7 @@
             var x1, y1, p0, p1, v0, v1;
             var p0y, p1y, v0y, v1y;
             var hPoints = new Array();
-            for (var i = 0; i < 1.0; i += 0.05){
+            for (var i = 0; i <= 1.0; i += 0.01){
                 var ii = i*i;
                 var iii = ii * i;
                 
@@ -241,7 +259,30 @@
             }
         
         return hPoints;
+    }
     
+    function computePartHermiteInterp(){
+            var p0 = points[1];
+            var p1 = points[2];
+            
+            var vect0 =  points[0] - points[1];
+            var vect1 =  points[3] - points[2];
+            
+        
+            var hPoints = getHermiteInterpolation(p0, p1, vect0, vect1);
+            //drawCanvas();
+            drawCurve(context1, pinkStyle, hPoints);
+    
+    }
+    
+    function partHermiteInterp(){
+        part = true;
+        drawCanvas();
+    }
+    
+    function hermiteInterp(){
+        part = false;
+        drawCanvas();
     }
 
 

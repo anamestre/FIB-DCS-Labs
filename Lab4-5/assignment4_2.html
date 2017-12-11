@@ -29,6 +29,7 @@
     */
 
     var canvas1, context1, points, myTransformation, style, drag = null, draggedPoint;
+    var p1v = new Array(), p2v = new Array(), p3v = new Array(), p4v = new Array(), pinkStyle;
 
 	points = [{ x:300, y:200 },{ x:500, y:200 },{ x:500, y:400 },{ x:300, y:400 }];
 
@@ -41,6 +42,12 @@
             curve:	{ width: 6, color: "#333" },
             line:	{ width: 1, color: "#C00" },
             point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
+        }
+        
+        pinkStyle = {
+            curve:	{ width: 6, color: "#EF4EEA" },
+            //line:	{ width: 1, color: "#EF4EEA" },
+            //point: { radius: 10, width: 2, color: "#900", fill: "rgba(200,200,200,0.5)", arc1: 0, arc2: 2 * Math.PI }
         }
 
         // line style defaults
@@ -72,6 +79,11 @@
         // Curve through points and vertices
         drawCurve(context1, style, points); // Draw curve
         drawVertices(context1, style, points); // Draw vertices as circles
+        
+        if(p1v.length != 0) drawCurve(context1, pinkStyle, p1v);
+        if(p2v.length != 0) drawCurve(context1, pinkStyle, p2v);
+        if(p3v.length != 0) drawCurve(context1, pinkStyle, p3v);
+        if(p4v.length != 0) drawCurve(context1, pinkStyle, p4v);
 
     }
 
@@ -201,8 +213,67 @@
         alert('doCubicSpline');
     }
 	
-	function doRelaxedCubicSpline() {
-        alert('doRelaxedCubicSpline');
+    function doRelaxedCubicSpline() {
+        let t2;
+        let t2x = (-7 * points[0].x - 3 * points[1].x + 12 * points[2].x - 2 * points[3].x) / 15;
+        let t2y = (-7 * points[0].y - 3 * points[1].y + 12 * points[2].y - 2 * points[3].y) / 15;
+        t2 = {x: t2x, y: t2y};
+        let t3;
+        let t3x = (2 * points[0].x - 12 * points[1].x + 3 * points[2].x + 7 * points[3].x) / 15;
+        let t3y = (2 * points[0].y - 12 * points[1].y + 3 * points[2].y + 7 * points[3].y) / 15;
+        t3 = {x: t3x, y: t3y};
+        let t1;
+        let t1x = (3/2) * (points[1].x - points[0].x) - (1/2) * t2.x;
+        let t1y = (3/2) * (points[1].y - points[0].y) - (1/2) * t2.y;
+        t1 = {x: t1x, y: t1y};
+        let t4;
+        let t4x = (3/2) * (points[3].x - points[2].x) - (1/2) * t3.x;
+        let t4y = (3/2) * (points[3].y - points[2].y) - (1/2) * t3.y;
+        t4 = {x: t4x, y: t4y};
+        getPs(points[0], points[1], points[2], points[3], t1, t2, t3, t4);
+        drawCanvas();
+    }
+
+    function getPs(p1, p2, p3, p4, t1, t2, t3, t4){
+        p1v = new Array();
+        p2v = new Array();
+        p3v = new Array();
+        p4v = new Array();
+        var tsp1 = getTs(p1, p2, t1, t2);
+        var tsp2 = getTs(p2, p3, t2, t3);
+        var tsp3 = getTs(p3, p4, t3, t4);
+        var lin, cuad, cub, cons;
+        for (var i = 0; i <= 100; i++){
+            var t = i / 100;
+            cons = {x: tsp1[0].x, y: tsp1[0].y};
+            lin = {x: tsp1[1].x * t, y: tsp1[1].y * t};
+            cuad = {x: tsp1[2].x * t * t, y: tsp1[2].y * t * t};
+            cub = {x: tsp1[3].x * t * t * t, y: tsp1[3].y * t * t * t};
+            p1v.push({x: cons.x + lin.x + cuad.x + cub.x, y: cons.y + lin.y + cuad.y + cub.y});
+            cons = {x: tsp2[0].x, y: tsp2[0].y};
+            lin = {x: tsp2[1].x * t, y: tsp2[1].y * t};
+            cuad = {x: tsp2[2].x * t * t, y: tsp2[2].y * t * t};
+            cub = {x: tsp2[3].x * t * t * t, y: tsp2[3].y * t * t * t};
+            p2v.push({x: cons.x + lin.x + cuad.x + cub.x, y: cons.y + lin.y + cuad.y + cub.y});
+            cons = {x: tsp3[0].x, y: tsp3[0].y};
+            lin = {x: tsp3[1].x * t, y: tsp3[1].y * t};
+            cuad = {x: tsp3[2].x * t * t, y: tsp3[2].y * t * t};
+            cub = {x: tsp3[3].x * t * t * t, y: tsp3[3].y * t * t * t};
+            p3v.push({x: cons.x + lin.x + cuad.x + cub.x, y: cons.y + lin.y + cuad.y + cub.y});
+        }
+    }
+
+    function getTs(p1, p2, t1, t2){
+        let res = new Array();
+        res.push(p1);
+        res.push(t1);
+        let t2x = -3 * p1.x + 3 * p2.x + (-2) * t1.x - t2.x;
+        let t2y = -3 * p1.y + 3 * p2.y + (-2) * t1.y - t2.y;
+        res.push({x: t2x, y: t2y});
+        let t3x = 2 * p1.x + (-2) * p2.x + t1.x + t2.x;
+        let t3y = 2 * p1.y + (-2) * p2.y + t1.y + t2.y;
+        res.push({x: t3x, y: t3y});
+        return res;
     }
 
 
